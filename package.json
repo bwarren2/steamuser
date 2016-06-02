@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dota2": "git+https://github.com/RJacksonm1/node-dota2.git",
     "express": "4.13.4",
     "getenv": "0.6.0",
     "password-generator": "2.0.2",
