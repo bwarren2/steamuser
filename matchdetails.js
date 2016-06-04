@@ -1,6 +1,7 @@
 var SteamUser = require('steam-user');
 var generatePassword = require("password-generator");
 var dota2 = require("dota2");
+var client = require('./redis_client').redis_client();
 
 var steamuser = new SteamUser();
 
@@ -10,12 +11,13 @@ function myCleanup() {
   console.log('Closing up shop');
   steamuser.logOff();
   console.log('Logged off.');
+  client.set(creds['accountName'], 'out', console.log)
 };
-
-steamuser.logOn({
-    "accountName": "jupasehudi",
-    "password": "gemecalite"
-});
+var creds = {
+    "accountName": "wozawiwapo",
+    "password": "kabizanoke"
+}
+steamuser.logOn(creds);
 
 steamuser.on('error', function(e) {
     console.log(e);
@@ -41,6 +43,11 @@ steamuser.on('loggedOn', function(details) {
     });
 
 });
+
+steamuser.on('sentry', function(sentryHash) {
+  console.log("sentry: " + sentryHash)
+});
+
 console.log('EOF');
 
 
