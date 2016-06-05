@@ -13,6 +13,7 @@ function myCleanup() {
   console.log('Logged off.');
   client.set(creds['accountName'], 'out', console.log)
 };
+
 var creds = {
     "accountName": "wozawiwapo",
     "password": "kabizanoke"
@@ -22,6 +23,8 @@ steamuser.logOn(creds);
 steamuser.on('error', function(e) {
     console.log(e);
 });
+
+
 
 steamuser.on('loggedOn', function(details) {
     console.log("Logged into Steam as " + steamuser.steamID.getSteam3RenderedID());
@@ -42,10 +45,6 @@ steamuser.on('loggedOn', function(details) {
         });
     });
 
-});
-
-steamuser.on('sentry', function(sentryHash) {
-  console.log("sentry: " + sentryHash)
 });
 
 console.log('EOF');
