@@ -29,16 +29,16 @@ Alice asks the sorted set for the first account without a checkout, say 'abaddon
 
 Bob asks the same, and gets the same.
 
-Alice and Bob both issue INCRs against the checkouts.  Redis happily supplies the zscore of `abaddon` in `botapi:checkouts` each time.  One of the two (depending on who INCRd first) gets a return value of 1 and the other gets 2.  The bot that did not get 1 realized he was too slow checking out, and tries again.  Notably, the INCRs remove that username from the 0-checked-out tier of the credential pool, so other bots will be getting other usernames as they spin up.  The bot that did get 1 pulls out a password
+Alice and Bob both issue INCRs against the checkouts.  Redis happily supplies the zscore of `abaddon` in `botapi:checkouts` each time.  One of the two (depending on who INCRd first) gets a return value of 1 and the other gets 2.  The bot that did not get 1 realizes he was too slow checking out, and tries again.  Notably, the INCRs remove that username from the 0-checked-out tier of the credential pool, so other bots will be getting other usernames as they spin up.  The bot that did get 1 pulls out a password
 
 On process shutdown, a cleanup function calls logOut() to be polite to Valve, and resets the checkouts value for that username to 0.
 
 ### Redis Schema
 
 
-botapi:checkouts = <uname> <score=int> // Scored set
+botapi:checkouts = $uname $score=int // Scored set
 botapi:passwords = {uname:pw}
-botapi:<uname>:api-requests:<dt> = <int>
+botapi:$uname:api-requests:$dt = $int
 
 
 ### Things that need work
@@ -95,7 +95,7 @@ client.hset(["botapi:passwords", "wozawiwapo", "kabizanoke"], function(err, resp
 });
 
 client.expire(["botapi:checkouts", 1])
-
+s
 var args = ['botapi:checkouts', 0, 'wozawiwapo']
 client.zadd(args, function (err, response) {});
 var args = ['botapi:checkouts', 0, 'jupasehudi']
