@@ -2,7 +2,8 @@ var SteamUser = require('steam-user');
 var generatePassword = require("password-generator");
 var client = require('./redis_client').redis_client();
 var dota2 = require("dota2");
-var deferred = require("deferred");
+
+var gc_response_timeout = 20000;
 
 var setup = function(){
 
@@ -117,51 +118,33 @@ var setup = function(){
         })
     });
 
-steamuser.getMatchDetails = function getMatchDetails (matchId, callback) {
-  if (!steamuser.ready) {
-    console.log("Not ready");
-    callback("GC not ready");
-    return;
-  }
-  console.log(`Pinging for ${matchId}`);
-  var self = this;
+    steamuser.getMatchDetails = function getMatchDetails (matchId, callback) {
+        if (!steamuser.ready) {
+            console.log("Not ready");
+            callback("GC not ready");
+            return;
+        }
+        console.log(`Pinging for ${matchId}`);
+        steamuser.Dota2.requestMatchDetails(matchId, function (err, data) {
 
-  // F5DoS protection; if we're waiting for a response for this Match ID then don't send a new request.
-  if (!this.match_deferreds[matchId]) {
-    this.match_deferreds[matchId] = new deferred();
-    this.match_deferreds[matchId].pms = this.match_deferreds[matchId].promise();
-    this.Dota2.requestMatchDetails(matchId, function (err, body) {
-      if (!self.match_deferreds[matchId]) {
-        return;
-      }
-      self.match_deferreds[matchId].resolve(body);
-    });
-  }
+        if (data.result !== 1) {
+            callback("invalid");
+        }
+        else {
+          data['id'] = matchId;
+          callback(
+            null,
+            data // To match return format of other api
+          );
+        }
+      });
 
-  this.match_deferreds[matchId].pms.then(function (data) {
-    // console.log(data);
-    console.log('resolving')
-    delete self.match_deferreds[matchId];
-    if (data.result !== 1) {
-        console.log('fail')
-      callback("invalid");
-    }
-    else {
-      data['id'] = matchId;
-      console.log(data);
-      callback(
-        null,
-        data // To match return format of other api
-      );
-    }
-  });
-
-  // Time out request after so long - GC doesn"t tell us match ids when it returns bad status",
-  // so this is the best way to weed out invalid match ids.
-  setTimeout(function () {
-    delete self.match_deferreds[matchId];
-  }, steamuser.steam_response_timeout);
-};
+      // Time out request after so long - GC doesn"t tell us match ids when it returns bad status",
+      // so this is the best way to weed out invalid match ids.
+      setTimeout(function () {
+        callback("timeout");
+      }, gc_response_timeout);
+    };
 
     return steamuser;
 }
