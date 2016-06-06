@@ -17,47 +17,47 @@ steambot.emit('reauth');
 app.get('/match-details', function (req, res) {
   var matchId = req.query.match_id;
   if (!matchId) {
-    // No match ID, display regular index.
-    // res.render('index', { title: 'match urls!' });
-    // res.end();
+      res.json({ error: 'match-id-required' });
   } else {
     if (!isNaN(matchId) && parseInt(matchId, 10) < 1024000000000) {
-      matchId = parseInt(matchId, 10);
-
+        matchId = parseInt(matchId, 10);
         if (steambot.ready) {
-          // We need new data from Dota.
           steambot.getMatchDetails(matchId, function (err, data) {
             if (err) {
-              res.json({error: err});
+                // Because of the GC timeout crashing on headers-sent
+                if (!res.headersSent){
+                    console.log(`Errored for ${matchId} ${err}`);
+                    res.json({error: err});
+                }
             } else {
-              res.json({ replay_url: url });
+                console.log(`Success for ${matchId}!`);
+                res.json(data);
             }
-            res.end();
           });
 
-          // If Dota hasn't responded by 'request_timeout' then send a timeout page.
+          // If Dota hasn't responded by 'request_timeout' then send a timeout
           setTimeout(
             function () {
-              res.json({ error: 'timeout' });
-              res.end();
+                if (!res.headersSent){
+                  console.log('Running timeout')
+                  res.json({ error: 'timeout' });
+                }
             },
             config.request_timeout
           );
         } else {
-          // We need new data from Dota, and Dota is not ready.
+          // Dota is not ready.
           res.json({ error: 'notready' });
-          res.end();
         }
     } else {
+
       // Match ID failed validation.
-      res.render('index', {
-        title: 'match urls!',
-        error: "invalid"
-      });
-      res.end();
+      res.json({ error: 'invalid' });
+
     }
   }
 });
+
 
 http.createServer(app).listen(app.get('port'), function () {
   console.log(`Express server listening on port ${app.get('port')}`);
