@@ -1,0 +1,12 @@
+div#mainblock{
+    margin-top:20px;
+}
+p{
+    font-size:16px;
+}
+button.checkout-reset{
+    margin-left:15px;
+}
+button.hits-reset{
+    margin-left:15px;
+}

@@ -1,0 +1,50 @@
+html
+  head
+    title="Redis Credentials Management"
+
+    //- For the pretty
+    link(href='//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css', rel='stylesheet')
+    link(href='http://localhost:3100/public/style.css', rel='stylesheet')
+    link(href='http://localhost:3100/public/messenger.css', rel='stylesheet')
+
+    //- Everything on the internet requires jquery
+    script(src="https://code.jquery.com/jquery-2.2.4.min.js")
+
+
+  body
+    div#mainblock
+      div.container
+        div.jumbotron
+          h1= "Redis Credentials Management"
+          p.
+              A utility page to manage the steambot credentials for the BotAPI.
+          p.bg-danger.text-danger.
+            Nothing here asks for prompts or has protections.  Choose wisely
+
+        div.row
+          div.col-md-12
+          div.col-md-12
+            h2= "Active usernames"
+
+            table.table.table-striped
+              thead
+                tr
+                  td Username
+                  td Password
+                  td Current Checkouts
+                  td API Hits Today
+              tbody
+              each obj, uname in checkouts
+                tr
+                  td= obj.username
+                  td= obj.password
+                  td= obj.checkouts
+                    button(class="btn btn-primary checkout-reset", data-uname=obj.username).
+                      Reset
+                  td= 0
+                    button(class="btn btn-primary hits-reset", data-uname=obj.username).
+                      Reset
+//- Why is everything bound to localhost?  Well, you shouldn't run this anywhere else.
+script(src="http://localhost:3100/public/project.js")
+//- Yeah, we hard-copy stuff from a bower install.  Come at me, bro.
+script(src="http://localhost:3100/public/messenger.min.js")

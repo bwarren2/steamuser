@@ -19,10 +19,15 @@ var setup = function(){
       steamuser.logOff();
 
       // No more checkout claim.
+      if (
+        steamuser.botnet_name!=='undefined' &&steamuser.botnet_name!==undefined
+      ) {
+
       client.zadd(
         ['botapi:checkouts', 0, steamuser.botnet_name],
         function(err, resp){}
       );
+      }
       console.log('Logged off.');
     };
 
