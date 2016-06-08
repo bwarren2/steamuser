@@ -4,7 +4,7 @@ module.exports = {
       files: [
         "public/css/*.less",
       ], // which files to watch
-      tasks: ["less", "cssmin"],
+      tasks: ["less", "cssmin", 'concat_css'],
       options: {
         nospawn: true
       }

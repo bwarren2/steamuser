@@ -1,7 +1,14 @@
-function getDateTime() {
-
+function today() {
     var date = new Date();
+    return format(date);
+}
 
+function yesterday() {
+    var date = new Date(Date.now() - 86400000);
+    return format(date);
+}
+
+function format(date){
     var year = date.getFullYear();
 
     var month = date.getMonth() + 1;
@@ -15,5 +22,6 @@ function getDateTime() {
 }
 
 module.exports = {
- getDateTime: getDateTime
+ yesterday: yesterday,
+ today: today,
 }

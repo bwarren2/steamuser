@@ -2,7 +2,7 @@ var express = require('express');
 var http = require('http');
 var getenv = require('getenv');
 var client = require('./redis_client').redis_client();
-var date = require('./helpers/date').getDateTime;
+var date = require('./helpers/date');
 
 var app = express();
 var PORT = getenv('PORT');
@@ -13,24 +13,113 @@ app.set('view engine', 'pug');
 app.set('port', getenv('PORT'));
 app.use('/public', express.static(__dirname + '/public'));
 
+var bodyParser = require('body-parser')
+app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  extended: true
+}));
+
 app.get('/', function (req, res) {
+  var yeday = date.yesterday();
+  var today = date.today();
+  // Callback hell.  Could maybe also be a multi() statement.
   client.zrangebyscore(
     ['botapi:checkouts', -100, 100, 'WITHSCORES'], function(err, checks)
   {
     client.hgetall('botapi:passwords', function(err, pws){
 
+      client.zrangebyscore(
+        [`botapi:${yeday}-api-hits`, 0, 200, 'WITHSCORES'], function(err, y_api)
+      {
+        client.zrangebyscore(
+          [`botapi:${today}-api-hits`, 0, 200, 'WITHSCORES'], function(err, t_api)
+        {
+          y_hits = {}
+          for (var i = 0; i < y_api.length - 1; i+=2) {
+            y_hits[y_api[i]] = {};
+            y_hits[y_api[i]] = y_api[i+1];
+          }
 
-      var checkouts = {}
-      for (var i = 0; i < checks.length - 1; i+=2) {
-        checkouts[checks[i]] = {};
-        checkouts[checks[i]]['checkouts'] = checks[i+1];
-        checkouts[checks[i]]['username'] = checks[i];
-        checkouts[checks[i]]['password'] = pws[checks[i]];
-      }
-      res.render('index',  {checkouts: checkouts});
+          t_hits = {}
+          for (var i = 0; i < t_api.length - 1; i+=2) {
+            t_hits[t_api[i]] = {};
+            t_hits[t_api[i]] = t_api[i+1];
+          }
+
+          var checkouts = {}
+          for (var i = 0; i < checks.length - 1; i+=2) {
+            checkouts[checks[i]] = {};
+            checkouts[checks[i]]['checkouts'] = checks[i+1];
+            checkouts[checks[i]]['username'] = checks[i];
+            checkouts[checks[i]]['password'] = pws[checks[i]];
+            console.log(t_hits[checks[i]]);
+            checkouts[checks[i]]['yesterday_hits'] = y_hits[checks[i]] || 0;
+            checkouts[checks[i]]['today_hits'] = t_hits[checks[i]] || 0;
+            checkouts[checks[i]]['today'] = today;
+            checkouts[checks[i]]['yesterday'] = yeday;
+          }
+          var context = {
+            checkouts: checkouts,
+            yesterday: yeday,
+            today: today,
+          };
+          res.render('index', context);
+
+        })
+      })
     })
    })
 });
+
+app.post('/reset', function (req, res) {
+  var type = req.body.datatype;
+  var username = req.body.username;
+  var today = date.today();
+  var yeday = date.yesterday();
+
+  switch (type){
+    case `${today}-api-hits`:
+      client.zadd(
+        [`botapi:${today}-api-hits`, 0, username], function(err, resp)
+      {
+        res.json(
+          {
+            'message': `Reset ${username} to 0 in botapi:${today}-api-hits`,
+            'type': 'warning'
+          }
+        );
+      });
+      break;
+    case `${yeday}-api-hits`:
+      client.zadd(
+        [`botapi:${yeday}-api-hits`, 0, username], function(err, resp)
+      {
+        res.json(
+          {
+            'message': `Reset ${username} to 0 in botapi:${yeday}-api-hits`,
+            'type':'warning'
+          }
+        );
+      });
+      break;
+    case `checkouts`:
+      client.zadd(
+        [`botapi:checkouts`, 0, username], function(err, resp)
+      {
+        res.json(
+          {
+            'message': `Reset ${username} to 0 in botapi:checkouts`,
+            'type':'warning'
+          }
+        );
+      });
+      break;
+    default:
+      res.json({'message': `Wat? ${username}, ${type}`, type:'failure'});
+  }
+});
+
+app.post('/create-users', function (req, res) {});
 
 var server = http.createServer(app);
 

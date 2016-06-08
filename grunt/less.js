@@ -6,7 +6,7 @@ module.exports = {
       optimization: 2,
     },
     files: {
-      "public/css/style.css": "public/css/style.less",
+      "public/css/project.css": "public/css/project.less",
     }
   }
 }

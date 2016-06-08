@@ -2,27 +2,24 @@ html
   head
     title="Redis Credentials Management"
 
-    //- For the pretty
-    link(href='//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css', rel='stylesheet')
-    link(href='http://localhost:3100/public/style.css', rel='stylesheet')
-    link(href='http://localhost:3100/public/messenger.css', rel='stylesheet')
-
     //- Everything on the internet requires jquery
-    script(src="https://code.jquery.com/jquery-2.2.4.min.js")
+    //- script(src="https://code.jquery.com/jquery-2.2.4.min.js")
 
+    //- Why is everything bound to localhost?  Well, you shouldn't run this anywhere else.
+    script(src="http://localhost:3100/public/built.js")
+    link(href='http://localhost:3100/public/style.css', rel='stylesheet')
 
   body
     div#mainblock
       div.container
         div.jumbotron
-          h1= "Redis Credentials Management"
+          h1= "Redis Credentials Manager"
           p.
-              A utility page to manage the steambot credentials for the BotAPI.
+              A utility page to manage the steambot credentials for the BotAPI.  Only interacts with the redis backend; your changes might mess up currently-running bots!  Reloads on actions.
           p.bg-danger.text-danger.
-            Nothing here asks for prompts or has protections.  Choose wisely
+            Nothing here asks for prompts or has protections.  Choose wisely.
 
         div.row
-          div.col-md-12
           div.col-md-12
             h2= "Active usernames"
 
@@ -32,19 +29,25 @@ html
                   td Username
                   td Password
                   td Current Checkouts
-                  td API Hits Today
+                  td= 'API Hits Today ('+today+')'
+                  td= 'API Hits Yesterday ('+yesterday+')'
               tbody
               each obj, uname in checkouts
                 tr
                   td= obj.username
                   td= obj.password
                   td= obj.checkouts
-                    button(class="btn btn-primary checkout-reset", data-uname=obj.username).
+                    button(class="btn btn-primary checkouts-reset", data-uname=obj.username, data-datatype='checkouts').
                       Reset
-                  td= 0
-                    button(class="btn btn-primary hits-reset", data-uname=obj.username).
+                  td= obj.today_hits
+                    button(class="btn btn-primary today-hits-reset", data-uname=obj.username, data-datatype=obj.today+'-api-hits').
                       Reset
-//- Why is everything bound to localhost?  Well, you shouldn't run this anywhere else.
-script(src="http://localhost:3100/public/project.js")
-//- Yeah, we hard-copy stuff from a bower install.  Come at me, bro.
-script(src="http://localhost:3100/public/messenger.min.js")
+                  td= obj.yesterday_hits
+                    button(class="btn btn-primary yesterday-hits-reset", data-uname=obj.username, data-datatype=obj.yesterday+'-api-hits').
+                      Reset
+          div.col-md-12
+            h2= "Create Users"
+          div.col-md-12
+            h2= "Import Users"
+          div.col-md-12
+            h2= "Reset Everything"
