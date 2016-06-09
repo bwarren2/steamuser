@@ -20,7 +20,7 @@ var setup = function(){
 
       // No more checkout claim.
       if (
-        steamuser.botnet_name!=='undefined' &&steamuser.botnet_name!==undefined
+        steamuser.botnet_name!=='undefined'&&steamuser.botnet_name!==undefined
       ) {
 
       client.zadd(
@@ -91,8 +91,12 @@ var setup = function(){
             if(uname===''){
                 console.log('No spare accounts available!')
                 return;
+            } else if (typeof myVar == 'undefined'){
+                console.log('Got bogus uname.')
+                return;
             }
             else{
+                console.log('Checking out.')
                 client.zincrby(
                     ['botapi:checkouts', 1, uname],
                     function(err, ct){
