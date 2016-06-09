@@ -1,0 +1,67 @@
+html
+  head
+    title="Redis Credentials Management"
+
+    //- Everything on the internet requires jquery
+    //- script(src="https://code.jquery.com/jquery-2.2.4.min.js")
+
+    //- Why is everything bound to localhost?  Well, you shouldn't run this anywhere else.
+    script(src="http://localhost:3100/public/built.js")
+    link(href='http://localhost:3100/public/style.css', rel='stylesheet')
+
+  body
+    div#mainblock
+      div.container
+        div.jumbotron
+          h1= "Redis Credentials Manager"
+          p.
+              A utility page to manage the steambot credentials for the BotAPI.  Only interacts with the redis backend; your changes might mess up currently-running bots!  Reloads on actions.
+          p(style="padding:20px", class='bg-danger text-danger').
+            Nothing here asks for prompts or has protections.  Choose wisely.
+
+        div.row
+          div.col-md-12
+            h2= "Active usernames"
+
+            table.table.table-striped
+              thead
+                tr
+                  td Username
+                  td Password
+                  td Current Checkouts
+                  td= 'API Hits Today ('+today+')'
+                  td= 'API Hits Yesterday ('+yesterday+')'
+              tbody
+              each obj, uname in checkouts
+                tr
+                  td= obj.username
+                  td= obj.password
+                  td= obj.checkouts
+                    button(class="btn btn-primary left-padded checkouts-reset", data-uname=obj.username, data-datatype='checkouts').
+                      Reset
+                  td= obj.today_hits
+                    button(class="btn btn-primary left-padded today-hits-reset", data-uname=obj.username, data-datatype=obj.today+'-api-hits').
+                      Reset
+                  td= obj.yesterday_hits
+                    button(class="btn btn-primary left-padded yesterday-hits-reset", data-uname=obj.username, data-datatype=obj.yesterday+'-api-hits').
+                      Reset
+          div.col-md-6.option-block
+            h2= "Create Users"
+              p.
+                I'm making you do this manually.  Don't do too much.
+              //- http POST localhost:3100/create-user uname=="jupasehudi" pass=="gemecalite"
+
+          div.col-md-6.option-block
+            h2= "Import Users"
+              button(class="btn btn-primary left-padded import-users").
+                Import from creds.json
+          div.col-md-6.option-block
+            h2= "Reset Everything"
+              button(class="btn btn-primary left-padded expire-everything").
+                Expire Everything botapi*
+          div.col-md-6.option-block
+            span
+              h2= "Expire Old Keys"
+                button(class="btn btn-primary left-padded expire-old-keys").
+                  Expire Old Keys
+            div.row#old-keys
