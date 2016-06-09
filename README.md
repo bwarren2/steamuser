@@ -38,17 +38,14 @@ On process shutdown, a cleanup function calls logOut() to be polite to Valve, an
 
 botapi:checkouts = $uname $score=int // Scored set
 botapi:passwords = {uname:pw}
-botapi:$uname:api-requests:$dt = $int
+botapi:$dt-api-requests = $uname $score=int
 
 
 ### Things that need work
 
-Do the sentry files for different accounts not conflict?  Do we need to salt the filename?
+We should probably have a `botapi:sentries` to avoid polluting everything.
 
 We should count the number of API calls per day and deauth/reauth if an account maxes out
-
-There should be a web api that enables making accounts and seeing checkout status/requests.
-
 
 
 Adding an account:
@@ -73,34 +70,12 @@ Adding an account:
 
     Persist uname + pass somewhere safe
 
+## Making it go
 
-# Setup script
+bind redis to 0.0.0.0
 
-var client = require('./redis_client').redis_client();
+`docker run -e 'REDISTOGO_URL=redis://172.17.0.1:6379/0' -e 'PORT=5000' --expose 5000  botapi`
 
-var args2 = ['botapi:passwords', -10, 10, 'WITHSCORES'];
-client.ZRANGEBYSCORE(args2, function (err, response) {
-    if (err) throw err;
-    console.log('Contents', response);
-});
-client.hgetall("botapi:passwords", function(err, resp){
-    console.log(resp)
-})
-client.expire(["botapi:passwords", 1])
-client.hset(["botapi:passwords", "jupasehudi", "gemecalite"], function(err, resp){
-    console.log(resp)
-});
-client.hset(["botapi:passwords", "wozawiwapo", "kabizanoke"], function(err, resp){
-    console.log(resp)
-});
+Get the URL from docker inspect, I think.
 
-client.expire(["botapi:checkouts", 1])
-s
-var args = ['botapi:checkouts', 0, 'wozawiwapo']
-client.zadd(args, function (err, response) {});
-var args = ['botapi:checkouts', 0, 'jupasehudi']
-client.zadd(args, function (err, response) {});
-
-client.zrangebyscore(['botapi:checkouts', 0, 10, 'WITHSCORES'], function(err, resp){
-    console.log("Got "+resp);
-});
+`http get 172.17.0.2:5000/match-details match_id==2417912704`
