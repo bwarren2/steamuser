@@ -80,7 +80,6 @@ app.get('/', function (req, res) {
               checkouts[y_api[i]]['yesterday_hits'] = y_api[i+1] || 0;
             }
             for (var i = 0; i < t_api.length - 1; i+=2) {
-              console.log(checkouts[t_api[i]], t_api[i])
               checkouts[t_api[i]]['today_hits'] = t_api[i+1] || 0;
             }
           }
