@@ -79,49 +79,6 @@ def get_running_tasks():
     )).get("taskArns", [])
 
 
-@task(alias='run', default=True)
-def run_image(name, guard=''):
-    """
-    Call like this to trigger the Steam Guard:
-
-        $ fab run:name
-
-    Then call this:
-
-        $ fab run:name,guard
-
-    Then, you can curl the ECS host:
-
-        $ curl -v http://52.39.102.221:5000/tools/matchurls\?...
-
-    We can put up to five on one host before we'll hit IP rate limit issues, so
-    we really need to prioritize multiple ECS hosts.
-    """
-    empties = get_empty_containers()
-    if not empties:
-        abort("No available container instances.")
-    local(" ".join((
-        "aws",
-        "ecs",
-        "start-task",
-        "--task-definition",
-        "replay-url-service:3",
-        "--container-instances",
-        empties[0],
-        "--overrides",
-        repr(
-            generate_environment_overrides(
-                dict(
-                    STEAM_NAME=name,
-                    STEAM_USER=name,
-                    STEAM_PASS=pass,
-                    STEAM_GUARD=guard,
-                )
-            )
-        ),
-    )))
-
-
 @task
 def build_docker_image():
     login_info = local(
@@ -134,12 +91,13 @@ def build_docker_image():
         'docker',
         'tag -f',
         'botapi:latest',
-        '774716370608.dkr.ecr.us-west-2.amazonaws.com/botapi:latest'
+        '288612536250.dkr.ecr.us-west-2.amazonaws.com/botapi:latest'
     )))
+
     local(' '.join((
         'docker',
         'push',
-        '774716370608.dkr.ecr.us-west-2.amazonaws.com/botapi:latest'
+        '288612536250.dkr.ecr.us-west-2.amazonaws.com/botapi:latest'
     )))
 
 
