@@ -7,7 +7,7 @@ var Cleanup = function Cleanup(callback) {
   // attach user callback to the process event emitter
   // if no callback, it will still exit gracefully on Ctrl-C
   callback = callback || noOp;
-  process.on('cleanup',callback);
+  process.on('cleanup', callback);
 
   // do app specific cleaning before exiting
   process.on('exit', function () {
@@ -17,6 +17,12 @@ var Cleanup = function Cleanup(callback) {
   // catch ctrl+c event and exit normally
   process.on('SIGINT', function () {
     console.log('Ctrl-C...');
+    process.exit(2);
+  });
+
+  process.on('SIGTERM', function () {
+    console.log("SIGTERM'd");
+    process.emit('cleanup');
     process.exit(2);
   });
 
