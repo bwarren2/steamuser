@@ -1,0 +1,11 @@
+upstream botapi {
+    server botapi1 weight=1;
+    server botapi2 weight=1;
+    server botapi3 weight=1;
+}
+
+server {
+    location / {
+        proxy_pass http://botapi;
+    }
+}
