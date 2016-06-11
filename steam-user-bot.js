@@ -90,7 +90,6 @@ var setup = function(){
         [`botapi:${dt}-api-hits`, 0, max_hits*10, 'WITHSCORES'], function(err, hits){
           api_hit_bad = [];
           for (var i = 0; i < hits.length - 1; i+=2) {
-            console.log(i, hits,hits[i+1], hits[i], hits[i+1]>=max_hits)
             if (hits[i+1]>=max_hits) {
               api_hit_bad.push(hits[i]);
             }
@@ -98,9 +97,7 @@ var setup = function(){
 
           // Only use a name that has api hits left.
           var uname = undefined;
-          console.log('BAD names', api_hit_bad);
           unames.map(function(d){
-            console.log(api_hit_bad.indexOf(d)==-1, d)
             if(api_hit_bad.indexOf(d)==-1){
                 uname = d;
             }
@@ -164,12 +161,14 @@ var setup = function(){
     console.log(`Pinging for ${matchId} with ${steamuser.botnet_name}`);
     steamuser.Dota2.requestMatchDetails(matchId, function (err, data) {
       var dt = date.today();
+      console.log(`Incrementing botapi:${dt}-api-hits for ${steamuser.botnet_name}`)
       client.zincrby([`botapi:${dt}-api-hits`, 1, steamuser.botnet_name], function(err, ct){
 
         if (data.result !== 1) {
           callback("invalid");
         }
         else {
+            console.log("Should have incrd.")
             if(ct>=max_hits){
                 markLogoff()
                 var fn = function(){
